@@ -1,0 +1,17 @@
+@(msgForm: Form[User])
+@import helper._
+@main1 {
+
+    <div class="jumbotron">
+        <div class="container">
+        @form(routes.ChatController.prepareLogin()) {
+            @* 生成名字的输入框*@
+            @inputText(msgForm("name"), '_label -> "名字")
+            @* 生成内容的输入框 *@
+            @inputText(msgForm("password"), '_label -> "内容")
+            @* 生成用于提交的按钮 *@
+            <input type="submit" value="发送">
+            }
+        </div>
+    </div>
+}
