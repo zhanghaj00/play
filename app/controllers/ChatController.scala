@@ -1,5 +1,6 @@
 package controllers
 
+import action.AuthenticatedRequests
 import models.User
 import play.api.libs.json.JsValue
 import play.api.mvc._
@@ -9,9 +10,10 @@ import play.api.Play.current
 import play.api._
 import play.api.mvc.{Session => _, _}
 import play.api.Play.current
+import service.UserServiceImpl
 import views.html
 
-object ChatController extends Controller {
+object ChatController extends Controller with AuthenticatedRequests{
 
   /**
    * Main route. Redirects to the login page
@@ -19,40 +21,26 @@ object ChatController extends Controller {
   def enter = Action { implicit  request=>
     //Redirect(routes.ChatController.prepareLogin)
 
-    Ok(views.html.enter(LoginForm))
+    Ok(views.html.enter(loginForm))
   }
 
-  val LoginForm = Form(
-    mapping (
-      "name" -> nonEmptyText,
-      "password" -> nonEmptyText
-    )(User.apply)(User.unapply)
-  )
+
 
   def login = Action{ implicit  request=>
-    Ok(views.html.login())
+    Ok(views.html.login(request))
   }
   /**
    * Login page
    */
 
-  def prepareLogin = Action { implicit request =>
-    println("success")
-    LoginForm.bindFromRequest.fold(
-    //处理错误
-    errors => Ok(views.html.result("nihao")("sb")), //BadRequest(views.html.index(LoginForm))
-    success = {
-      case (user) =>
-        println("success"+user.name)
-        //发言
-        //Message.post(name, content)
-        //重新定向到显示留言列表和发言表单页面
-        Created.withSession("username"->user.name)
-        Ok(views.html.result(user.name)(user.password))
-    }
-    )
+  def prepareLogin = AuthenticateFirst { implicit request =>
+    Ok(views.html.result(request.session.get("auth").isDefined.toString)(""))
   }
 
+  def contactMe = AuthenticateForAll { implicit request =>
+    Ok(views.html.contact(request.request))
+
+  }
   /**
    * If login is ok, redirects to the chat page
    */

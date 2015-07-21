@@ -1,4 +1,4 @@
-@(mainContent: Html)
+@(mainContent: Html)(implicit request:Request[Any])
 <!Doctype html>
 <html lang="en-US">
     <head>
@@ -42,12 +42,15 @@
                     <nav class="main-nav">
                         <div class="menu-top-menu-container">
                             <ul id="menu-top-menu" class="clearfix">
-                                <li class="current-menu-item"><a href="/login">登陆</a></li>
-                                <li><a href="home-categories-description.html">个人中心</a></li>
+                                @if(request.session.get("auth").isDefined){
+                                    <li><a href="home-categories-description.html">个人中心</a></li>
+                                }else{
+                                    <li class="current-menu-item"><a href="/login">登陆</a></li>
+                                }
                                 <li><a href="home-categories-articles.html">地图中心</a></li>
                                 <li><a href="articles-list.html">找朋友</a></li>
                                 <li><a href="faq.html">常见问题</a></li>
-                                <li><a href="#">联系我们</a>
+                                <li><a href="/contactMe">联系我们</a>
 
 
                                 </li>

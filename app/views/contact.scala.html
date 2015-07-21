@@ -1,0 +1,8 @@
+@(implicit request:Request[Any])
+@main1{
+
+    <div class="container">
+        <h1>@request.session.get("auth").get</h1>
+    </div>
+
+}

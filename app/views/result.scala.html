@@ -1,5 +1,5 @@
-@(name:String)(password:String)
-@main{
+@(name:String)(password:String)(implicit request:Request[Any])
+@main1{
     <div class="jumbotron">
         <div class="container">
             <h1>@name</h1>
