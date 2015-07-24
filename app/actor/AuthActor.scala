@@ -12,7 +12,7 @@ class AuthActor extends Actor{
   def receive = {
     case Authenticate(request) =>
       if(request.session.get("auth").isDefined){
-        sender ! AuthenticateResult(true)
+        sender ! AuthenticateResult(true,Option(request.session.get("auth").get))
       }else{
         sender ! AuthenticateResult(false)
       }
@@ -22,4 +22,4 @@ class AuthActor extends Actor{
 
 case class Authenticate[A](request:Request[A])
 
-case class AuthenticateResult(valid:Boolean,user: Option[User]=None)
+case class AuthenticateResult(valid:Boolean,userName: Option[String]=None)

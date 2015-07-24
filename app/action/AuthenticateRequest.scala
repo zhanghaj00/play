@@ -52,7 +52,7 @@ trait AuthenticatedRequests{
         result =>
         if(result.valid){
           println("true")
-          block(AuthenticatedRequest[A](new User("",""),"", request))
+          block(AuthenticatedRequest[A](new User(result.userName.get,""),"", request))
         }else{
           println("false")
           block(AuthenticatedRequest[A](new User("",""),"", request))
@@ -76,7 +76,7 @@ trait AuthenticatedRequests{
           Created.withNewSession
           request.session.+("auth"->loginData.name)
           block(request).map{result=>
-            result.withSession("auth"->loginData.name)
+            result.withSession("auth"->loginData.name,"username"->loginData.name)
           }
         }getOrElse{
           Future.successful(Unauthorized("Invalid user/password"))

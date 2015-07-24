@@ -38,8 +38,9 @@ object ChatController extends Controller with AuthenticatedRequests{
   }
 
   def contactMe = AuthenticateForAll { implicit request =>
-    Ok(views.html.contact(request.request))
-
+    println("ok"+request.user.name)
+    //Ok(views.html.contact(request.request))
+    Redirect(routes.ChatController.chat)
   }
   /**
    * If login is ok, redirects to the chat page
@@ -59,15 +60,30 @@ object ChatController extends Controller with AuthenticatedRequests{
   /**
    * Chat page
    */
- /* def chat(user:User) = Action {
-    Ok(views.html.chat(user))
-  }*/
+  def chat = AuthenticateForAll { implicit request=>
+    Ok(views.html.login(request))
+  }
 
   /**
    * Websocket entry point using actors
    */
-  def websocket(user:User) = WebSocket.acceptWithActor[JsValue, JsValue] {
-    request => out =>
-      ChatActor.props(user, out)
+  def websocket = WebSocket.acceptWithActor[JsValue, JsValue] {
+   implicit request => out =>
+      ChatActor.props(request.session.get("username").get, out)
+  }
+
+  def logout = Action { implicit request =>
+    //TODO: kick me from all rooms and destroy my own actor (terminate the user enumerator)
+    Ok.withNewSession
+  }
+
+
+  //功能1.好友列表 2.找一个好友聊天  3.聊天室
+
+  def friendList = AuthenticateForAll { implicit request =>
+
+    val userName = request.session.get("userName").get
+    val friendList = TODO //TODO Vector 得到list
+    Ok(views.html.chat)
   }
 }

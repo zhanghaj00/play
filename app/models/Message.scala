@@ -41,7 +41,7 @@ object User {
    */
   def apply(json: JsValue):User = {
     val name = (json \ "name").as[String]
-    val color = (json \ "color").as[String]
+    val color = (json \ "password").as[String]
     val key = (json \ "key").as[String]
     val u = User(name, color)
     require(key == u.calculateKey())
@@ -53,22 +53,23 @@ object User {
    * json parsing or key checking) the client receives a Bad Request. It's a silly security mechanism,
    * but works for me ;)
    */
-  /*implicit def pathBinder(implicit stringBinder: PathBindable[String]) = new PathBindable[User] {
+  implicit def pathBinder(implicit stringBinder: PathBindable[String]) = new PathBindable[User] {
     override def bind(key: String, value: String): Either[String, User] = {
       try {
-        Right(User(Json.parse(Base64.getDecoder.decode(value))))
+          Right(User(Json.parse(value)))
       } catch {
         case e:Exception => Left("Who R U?") //Bad Request
       }
     }
 
     override def unbind(key: String, user: User): String = {
-      Base64.getEncoder.encodeToString(Json.stringify(user.toJson).getBytes())
+      Json.stringify(user.toJson)
     }
-  }*/
+  }
 }
 
 /**
  * Represents a texr message from an user
  */
-case class Message(user:User, text:String)
+case class Message(user:String, text:String)
+case class UserDetail(nickName:String,address:String,remark:String)

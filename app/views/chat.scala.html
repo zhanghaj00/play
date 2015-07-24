@@ -1,0 +1,70 @@
+
+@*<div class="container">
+<div class="row collapse">
+    <div class="large-12 columns panel">
+        <div class="row">
+            <div class="small-12 large-8 columns text-left">
+                <h2>Hi
+                    <span >@user</span>
+                </h2>
+            </div>
+            <div class="small-12 large-4 columns text-right">
+                <a class="button alert small" id="logout" href="#">Logout</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="large-12 columns">
+                <div id="output"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="large-12 columns">
+                <div class="row collapse">
+                    <div class="large-9 columns">
+                        <input type="text" id="message" placeholder="Write something..."/>
+                    </div>
+                    <div class="large-3 columns">
+                        <button id="send" class="button postfix">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+} {
+<script src='@routes.Assets.at("javascripts/websocket.js")'></script>
+<script>
+$(window).load ( function (){
+
+//sets the user color as background
+$("body").css("background-color", "red");
+
+//init the websocket using the method of websocket.js
+initWebsocket('@routes.ChatController.websocket(user)');
+
+//sets the focus on the message
+$('#message').focus();
+
+//doSend the text
+$('#send').click(function (e) {
+var m =  $('#message').val();
+if(m) {
+doSend(m);
+$('#message').val("");
+}
+$('#message').focus();
+});
+
+//also doSend the text when user hits return on the input
+$('#message').keypress(function(e) {
+if(e.which == 13) {
+$('#send').click();
+}
+});
+
+$('#logout').click(function (e) {
+doLogout();
+});
+)};
+</script>*@

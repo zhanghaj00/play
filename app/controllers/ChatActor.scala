@@ -8,20 +8,20 @@ import scala.collection.mutable
 /**
  * Every instance of ChatActor represents a client.
  */
-class ChatActor(user:User, client: ActorRef, clientListActor:ActorRef) extends Actor {
+class ChatActor(userName:String, client: ActorRef, clientListActor:ActorRef) extends Actor {
 
   /**
    * Adds the client to the client list
    */
   override def preStart() = {
-    clientListActor ! AddClient(user, client)
+    clientListActor ! AddClient(userName, client)
   }
 
   /**
    * Removes the client from the client list
    */
   override def postStop() = {
-    clientListActor ! RemoveClient(user, client)
+    clientListActor ! RemoveClient(userName, client)
   }
 
   /**
@@ -31,7 +31,7 @@ class ChatActor(user:User, client: ActorRef, clientListActor:ActorRef) extends A
   def receive = {
     case json: JsValue => {
       val message = (json \ "message").as[String]
-      clientListActor ! MessageAll(Message(user, message))
+      clientListActor ! MessageAll(Message(userName, message))
     }
   }
 }
@@ -47,8 +47,8 @@ object ChatActor {
    * Method invoked from the ChatController to initialize a
    * ChatActor
    */
-  def props(user:User, outChannel: ActorRef) = {
-    Props(new ChatActor(user, outChannel, clientListActor))
+  def props(userName:String, outChannel: ActorRef) = {
+    Props(new ChatActor(userName, outChannel, clientListActor))
   }
 }
 
@@ -63,11 +63,11 @@ case class Client(val userName:String, val actor: ActorRef);
  */
 sealed trait ClientListActorMsg{}
 
-case class AddClient(val user:User, val client:ActorRef) extends ClientListActorMsg
+case class AddClient(user:String, val client:ActorRef) extends ClientListActorMsg
 
-case class RemoveClient(val user:User, val client:ActorRef) extends ClientListActorMsg
+case class RemoveClient(user:String, val client:ActorRef) extends ClientListActorMsg
 
-case class MessageAll(val message:Message) extends ClientListActorMsg
+case class MessageAll(message:Message) extends ClientListActorMsg
 
 /**
  * This actor manages the list of clients. It's possible to add a client,
@@ -86,11 +86,11 @@ class ClientListActor extends Actor {
   def receive = {
 
     case AddClient(user, actor) => {
-      System.out.println("Added client " + user.name)
+      System.out.println("Added client " + user)
 
       val newLogin = Json.obj(
         "type" -> "login",
-        "user" -> user.name
+        "user" -> user
       )
       clients.foreach( client => {
         //sends the new login message to the rest of clients
@@ -104,34 +104,34 @@ class ClientListActor extends Actor {
         actor ! currentLogin
       })
 
-      clients.enqueue(Client(user.name, actor))
+      clients.enqueue(Client(user, actor))
     }
 
     case RemoveClient(user, actor) => {
-      val clientToRemove = Client(user.name, actor)
+      val clientToRemove = Client(user, actor)
 
       if(clients.dequeueFirst(_ == clientToRemove).isDefined) {
-        System.out.println("Removed client " + user.name)
+        System.out.println("Removed client " + user)
 
         //sends the logout message to the rest of clients
         val logout = Json.obj(
           "type" -> "logout",
-          "user" -> user.name
+          "user" -> user
         )
         clients.foreach(client => client.actor ! logout);
       } else {
-        System.out.println("Trying to remove client " + user.name + " but it doesn't exist!")
+        System.out.println("Trying to remove client " + user + " but it doesn't exist!")
       }
     }
 
     case MessageAll(m) => {
-      System.out.println("Message from " + m.user.name + ": " + m.text)
+      System.out.println("Message from " + m.user + ": " + m.text)
 
       val json = Json.obj(
         "type" -> "message",
         "message" -> m.text,
-        "user" -> m.user.name,
-        "color" -> m.user.password
+        "user" -> m.user,
+        "color" -> m.user
       )
       clients.foreach(client => client.actor ! json)
     }
