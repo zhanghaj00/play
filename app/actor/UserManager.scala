@@ -100,4 +100,5 @@ class UserActor(username: String) extends Actor with ActorLogging {
       channel.push(Protocol.formatJoinMessage(e))
   }
 }
+
 */

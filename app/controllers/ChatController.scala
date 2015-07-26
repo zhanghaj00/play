@@ -1,7 +1,10 @@
 package controllers
 
 import action.AuthenticatedRequests
-import models.User
+import actor.{GetFriendinvitation, GetFriendListEvent, UserActor}
+import scala.concurrent.duration._
+import akka.pattern.ask
+import akka.util.Timeout
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import play.api.data._
@@ -12,7 +15,7 @@ import play.api.mvc.{Session => _, _}
 import play.api.Play.current
 import service.UserServiceImpl
 import views.html
-
+import scala.concurrent.ExecutionContext.Implicits.global
 object ChatController extends Controller with AuthenticatedRequests{
 
   /**
@@ -80,10 +83,32 @@ object ChatController extends Controller with AuthenticatedRequests{
 
   //功能1.好友列表 2.找一个好友聊天  3.聊天室
 
-  def friendList = AuthenticateForAll { implicit request =>
+  def friendList = AuthenticateForAll.async{ implicit request =>
+    implicit val timeout:Timeout = 5.seconds
+    (UserActor.userActor ? GetFriendListEvent("friendlist:zhanghao")).mapTo[Map[String,String]].map{ //request.session.get("userName").get
+        friendMap => println(friendMap.get("hello").get)
+        Ok(views.html.login(request))
 
-    val userName = request.session.get("userName").get
+    }
+   /* val userName = request.session.get("userName").get
     val friendList = TODO //TODO Vector 得到list
-    Ok(views.html.chat)
+
+
+    Ok(views.html.chat)*/
+  }
+
+  def addfriend(username:String) = AuthenticateForAll.async { implicit request =>
+
+   // val username = request.body.asText.get
+    //通过username得到用户的detail 返回成功 用ajax 来请求这个借接口
+
+    val askUsername = request.session.get("username").get
+    val useractor = system.actorSelection("akka://YiQiRun/user/user:"+username)
+
+
+    (useractor ? GetFriendinvitation(askUsername)).mapTo[String].map{
+      result =>
+        Ok(result)
+    }
   }
 }

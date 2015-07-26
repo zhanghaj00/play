@@ -1,6 +1,6 @@
 package action
 
-import actor.{AuthenticateResult, Authenticate, AuthActor}
+import actor._
 import akka.actor.{ActorSystem, Props}
 import akka.util.Timeout
 import controllers.ChatController._
@@ -32,6 +32,7 @@ trait AuthenticatedRequests{
   implicit val system = ActorSystem("YiQiRun")
   val authActor = system.actorOf(Props[AuthActor],name = "AuthAcotr")
 
+  val userManager = system.actorOf(Props[UserManager1],name="userManager")
 
   implicit val timeout = Timeout(1 second)
 
@@ -76,7 +77,10 @@ trait AuthenticatedRequests{
           Created.withNewSession
           request.session.+("auth"->loginData.name)
           block(request).map{result=>
+            val username = loginData.name
+            system.actorOf(Props[UserActor].withDispatcher(username+":dispatcher"), name = s"user:$username")
             result.withSession("auth"->loginData.name,"username"->loginData.name)
+
           }
         }getOrElse{
           Future.successful(Unauthorized("Invalid user/password"))
