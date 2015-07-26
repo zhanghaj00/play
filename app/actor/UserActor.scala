@@ -2,11 +2,14 @@ package actor
 
 import akka.actor.{Props, ActorSystem, Actor, ActorLogging}
 import db.MyRedisClient
-
+import play.api.libs.iteratee.Concurrent
+import scala.concurrent.duration._
 /**
  * Created by zhanghao on 2015/7/24.
  */
 class UserActor extends Actor with ActorLogging{
+
+  private[this] val (enumerator, channel) = Concurrent.broadcast[String]
 
 
   def receive = {

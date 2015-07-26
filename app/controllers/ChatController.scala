@@ -1,7 +1,7 @@
 package controllers
 
 import action.AuthenticatedRequests
-import actor.{GetFriendinvitation, GetFriendListEvent, UserActor}
+import actor.{ChatUserActor, GetFriendinvitation, GetFriendListEvent, UserActor}
 import scala.concurrent.duration._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -70,9 +70,9 @@ object ChatController extends Controller with AuthenticatedRequests{
   /**
    * Websocket entry point using actors
    */
-  def websocket = WebSocket.acceptWithActor[JsValue, JsValue] {
+  def websocket = WebSocket.acceptWithActor[String, String] {
    implicit request => out =>
-      ChatActor.props(request.session.get("username").get, out)
+      ChatUserActor.props(request.session.get("username").get, out)
   }
 
   def logout = Action { implicit request =>

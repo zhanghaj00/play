@@ -78,7 +78,7 @@ trait AuthenticatedRequests{
           request.session.+("auth"->loginData.name)
           block(request).map{result=>
             val username = loginData.name
-            system.actorOf(Props[UserActor].withDispatcher(username+":dispatcher"), name = s"user:$username")
+            system.actorOf(Props[UserActor], name = s"user:$username")
             result.withSession("auth"->loginData.name,"username"->loginData.name)
 
           }
