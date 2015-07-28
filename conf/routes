@@ -6,11 +6,12 @@ GET         /                           controllers.ChatController.enter
 GET         /login                      controllers.ChatController.login
 POST        /loginwith                  controllers.ChatController.prepareLogin
 GET         /contactMe                  controllers.ChatController.contactMe
-POST        /chat/                      controllers.ChatController.chat
-POST        /ws/                        controllers.ChatController.websocket
+GET         /chat                       controllers.ChatController.chat
+GET         /ws/:username               controllers.ChatController.websocket(username:String)
 GET         /friendlist                 controllers.ChatController.friendList
 GET         /addfriend/:username        controllers.ChatController.addfriend(username:String)
 GET         /logout                     controllers.ChatController.logout
+GET         /page                       controllers.ChatController.page
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file               controllers.Assets.at(path="/public", file)
 

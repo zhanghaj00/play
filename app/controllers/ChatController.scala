@@ -2,6 +2,7 @@ package controllers
 
 import action.AuthenticatedRequests
 import actor.{ChatUserActor, GetFriendinvitation, GetFriendListEvent, UserActor}
+import akka.actor.PoisonPill
 import scala.concurrent.duration._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -64,20 +65,25 @@ object ChatController extends Controller with AuthenticatedRequests{
    * Chat page
    */
   def chat = AuthenticateForAll { implicit request=>
-    Ok(views.html.login(request))
+    Ok(views.html.chattmp(request.session.get("username").get)(request))
   }
 
   /**
    * Websocket entry point using actors
    */
-  def websocket = WebSocket.acceptWithActor[String, String] {
+  def websocket(username:String) = WebSocket.acceptWithActor[JsValue, String] {
    implicit request => out =>
-      ChatUserActor.props(request.session.get("username").get, out)
+     println("websocket connect:"+username)
+      ChatUserActor.props(username,out,system)
   }
 
   def logout = Action { implicit request =>
+
     //TODO: kick me from all rooms and destroy my own actor (terminate the user enumerator)
+    val useractor = system.actorSelection("akka://YiQiRun/user/user:"+request.session.get("username").get)
+    useractor ! PoisonPill
     Ok.withNewSession
+
   }
 
 
@@ -110,5 +116,10 @@ object ChatController extends Controller with AuthenticatedRequests{
       result =>
         Ok(result)
     }
+  }
+
+  def page = Action { implicit  request=>
+    Ok(views.html.page(request))
+
   }
 }

@@ -13,7 +13,7 @@ trait UserService {
 object UserServiceImpl extends UserService{
 
   val users = Map(
-  "bol@sina.com"->"123",
+  "bo@163.com"->"123",
   "ni@163.com"->"123"
   )
   def checkPassword(name: String, password: String): Boolean = {
